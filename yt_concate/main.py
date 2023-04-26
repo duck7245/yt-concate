@@ -1,43 +1,24 @@
 # 1. get all video list from a channel
+from yt_concate.pipeline.steps.get_video_list import GetVideoList
+from yt_concate.pipeline.pipeline import Pipeline
 
-import urllib.request
-import json
-from yt_concate.settings import API_KEY
-
-# CHANNEL_ID = 'UCKSVUHI9rbbkXhvAXK-2uxA' # global 的用全大寫來示意内容不變
-# print(API_KEY)
-CHANNEL_ID = API_KEY
+CHANNEL_ID = 'UCKSVUHI9rbbkXhvAXK-2uxA'  # global 的話用全大寫來示意内容不變
 
 
-def get_all_video_in_channel(channel_id):
-    api_key = 'AIzaSyD9TmtcASTSq0Q3yEO5DcEg0A70JYP7JRw'
+def main():
+    inputs = {
+        'channel_id': CHANNEL_ID
+    }
+    steps = [
+        GetVideoList(),
+    ]
 
-    base_video_url = 'https://www.youtube.com/watch?v='
-    base_search_url = 'https://www.googleapis.com/youtube/v3/search?'  # 跟 api 拿網址
-
-    first_url = base_search_url + 'key={}&channelId={}&part=snippet,id&order=date&maxResults=25'.format(api_key,
-                                                                                                        channel_id)
-
-    video_links = []
-    url = first_url
-    while True:
-        inp = urllib.request.urlopen(url)  # 丟出去的網址
-        resp = json.load(inp)  # 回傳的網址
-
-        for i in resp['items']:
-            if i['id']['kind'] == "youtube#video":
-                video_links.append(base_video_url + i['id']['videoId'])
-
-        try:
-            next_page_token = resp['nextPageToken']
-            url = first_url + '&pageToken={}'.format(next_page_token)
-        except KeyError:
-            break
-    return video_links
+    p = Pipeline(steps)
+    p.run(inputs)
 
 
-video_list = get_all_video_in_channel(CHANNEL_ID)
-print(len(video_list))
+if __name__ == '__main__':  # 多寫個 check 來確認程式進入點是從檔案 main 的位置, 以防其它 import 的 function 裡也有 main 的執行檔
+    main()
 
 # 2. download youtube subtitle
 # 3. download youtube video
